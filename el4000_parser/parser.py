@@ -1,6 +1,7 @@
 from functools import partial
 import struct
 import re
+from datetime import datetime, timedelta
 
 
 def decimal_to_hex(num):
@@ -14,13 +15,15 @@ def read_binary_file(path):
         struct_fmt = '=1B'  # read binary file as unsigned bytes
         struct_len = struct.calcsize(struct_fmt)
         struct_unpack = struct.Struct(struct_fmt).unpack_from
-        return [struct_unpack(chunk) for chunk in iter(partial(f.read, struct_len), b'')]
+        return list(map(lambda b: b[0],
+                        [struct_unpack(chunk) for chunk in iter(partial(f.read, struct_len),
+                                                                b'')]))
 
 
 def find_start_codes(bin_list):
     """ searches for E0C5EA hex-codes (start-codes) """
 
-    bin_string = ''.join(map(lambda b: str(b[0]).rjust(3, '0'), bin_list))
+    bin_string = ''.join(map(lambda b: str(b).rjust(3, '0'), bin_list))
     return [match.span()[0]//3 for match in re.finditer('224197234', bin_string)]
 
 
@@ -35,15 +38,34 @@ def slice(bin_list):
         yield chunk
 
 
+def parse_chunk(chunk):
+    """ parse a given chunk and yield each data row """
+
+    # get chunk date (5 Byte)
+    date = datetime(month=chunk[0], day=chunk[1],
+                    year=2000+chunk[2], hour=chunk[3], minute=chunk[4])
+
+    # get data rows (5Byte each)
+    for data_index in range(0, (len(chunk)-5)//5):
+        data = chunk[(5*data_index)+5: (5*data_index)+10]
+
+        # calculate "true" values
+        voltage = int(decimal_to_hex(data[0])+decimal_to_hex(data[1]), 16)/10
+        ampere = int(decimal_to_hex(data[2])+decimal_to_hex(data[3]), 16)/1000
+        power_factor = data[4]/100
+        time = date + timedelta(minutes=data_index)
+        yield time, voltage, ampere, power_factor
+
+def parse_file(path):
+    """ read and parse a given file """
+    binary = read_binary_file(path)
+    for chunk_id, chunk in enumerate(slice(binary)):
+        return parse_chunk(chunk)
+
 if __name__ == '__main__':
     # parse file
     path = "data/b1c622b2.bin"
-    binary = read_binary_file(path)
+    data = parse_file(path)
 
-    # slice binary list into chunks for each start-code
-    for chunk_id, chunk in enumerate(slice(binary)):
-        print(chunk_id, len(chunk))
-
-    # print result
-    # for index, chunk in enumerate(binary[4945:]):
-    #     print(index, chunk[0], decimal_to_hex(chunk[0]))
+    for time, voltage, ampere, power_factor in data:
+            print(f"{time} - {voltage}v, {ampere}a, {power_factor}pf")
