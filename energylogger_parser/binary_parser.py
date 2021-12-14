@@ -63,15 +63,3 @@ def parse_file(path):
     for chunk in slice(read_binary_file(path)):
         data += parse_chunk(chunk)
     return data
-
-
-
-if __name__ == '__main__':
-    # parse file
-    path = "data/b1c622b2.bin"
-    data = parse_file(path)
-
-    print(len(data))
-
-    for time, voltage, ampere, power_factor in data:
-        print(f"{time} - {voltage}v, {ampere}a, {power_factor}pf")

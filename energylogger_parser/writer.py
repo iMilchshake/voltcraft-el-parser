@@ -1,6 +1,6 @@
 from typing import Generator
 
-from el4000_parser.binary_parser import parse_file
+from energylogger_parser.binary_parser import parse_file
 
 
 def csv_string(data: Generator):
@@ -17,7 +17,3 @@ def export_data(data_string: str, path: str):
     """ write a given string to a file """
     with open(path, 'w') as f:
         f.write(data_string)
-
-
-if __name__ == '__main__':
-    export_data(csv_string(parse_file('data/b1c622b2.bin')), 'out.csv')
