@@ -1,6 +1,6 @@
-from functools import partial
 import struct
 import re
+from functools import partial
 from datetime import datetime, timedelta
 
 
@@ -56,16 +56,22 @@ def parse_chunk(chunk):
         time = date + timedelta(minutes=data_index)
         yield time, voltage, ampere, power_factor
 
+
 def parse_file(path):
     """ read and parse a given file """
-    binary = read_binary_file(path)
-    for chunk_id, chunk in enumerate(slice(binary)):
-        return parse_chunk(chunk)
+    data = list()
+    for chunk in slice(read_binary_file(path)):
+        data += parse_chunk(chunk)
+    return data
+
+
 
 if __name__ == '__main__':
     # parse file
     path = "data/b1c622b2.bin"
     data = parse_file(path)
 
+    print(len(data))
+
     for time, voltage, ampere, power_factor in data:
-            print(f"{time} - {voltage}v, {ampere}a, {power_factor}pf")
+        print(f"{time} - {voltage}v, {ampere}a, {power_factor}pf")
