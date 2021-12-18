@@ -7,6 +7,7 @@ from voltcraft_el_parser.writer import export_csv
 
 def run():
     """ run argparse cli-application """
+
     parser = argparse.ArgumentParser(description="A parser for EL3500/EL4000 binary files",
                                      prog="python -m voltcraft_el_parser")
     parser.add_argument("binary_path", type=str, help="path to the input binary file")

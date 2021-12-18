@@ -9,10 +9,12 @@ def csv_string(data: iter):
 
 def export_data(data_string: str, path: str):
     """ write a given string to a file """
+
     with open(path, 'w') as f:
         f.write(data_string)
 
 
 def export_csv(data: iter, path: str):
     """ write given data to a csv-file """
+
     export_data(csv_string(data), path)
