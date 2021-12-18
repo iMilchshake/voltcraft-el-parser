@@ -59,7 +59,5 @@ def parse_chunk(chunk):
 
 def parse_file(path):
     """ read and parse a given file """
-    data = list()
-    for chunk in slice(read_binary_file(path)):
-        data += parse_chunk(chunk)
-    return data
+
+    return itertools.chain.from_iterable([parse_chunk(chunk) for chunk in slice(read_binary_file(path))])

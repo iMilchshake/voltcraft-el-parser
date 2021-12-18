@@ -1,9 +1,5 @@
-from typing import Generator
-
-
-def csv_string(data: Generator):
-    """ convert data to a csv-string
-        expects data from parse_file() or parse_chunk() """
+def csv_string(data: iter):
+    """ convert data to a csv-string. Expects data from parse_file() or parse_chunk() """
 
     out = 'datetime,voltage,ampere,power_factor\n'
     for time, voltage, ampere, power_factor in data:
@@ -17,6 +13,6 @@ def export_data(data_string: str, path: str):
         f.write(data_string)
 
 
-def export_csv(data: Generator, path: str):
+def export_csv(data: iter, path: str):
     """ write given data to a csv-file """
     export_data(csv_string(data), path)
